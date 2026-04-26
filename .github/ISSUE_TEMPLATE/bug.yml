@@ -1,0 +1,83 @@
+name: Bug report
+description: |
+  Report a reproducible bug / 报告一个可复现的 bug
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report.
+        感谢你抽时间报告这个 bug。 Please fill in as much detail as you can.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit SHA
+      description: |
+        Which release tag or git commit are you on? / 你使用的版本号或 git commit。
+      placeholder: "v0.0.0 or abc1234"
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / runtime
+      description: |
+        Browser and version, or backend runtime. / 浏览器及版本，或后端运行环境。
+      placeholder: "Chrome 124 / Firefox 125 / Python 3.11 backend"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Minimal steps that reliably reproduce the issue. / 能稳定复现问题的最小步骤。
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: |
+        What did you expect to happen? / 你期望发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: |
+        What actually happened? / 实际发生了什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: |
+        Paste relevant logs, stack traces, or attach screenshots.
+        粘贴相关日志、堆栈，或附上截图。
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I have searched existing issues and confirmed this is not a duplicate.
+          required: true
+        - label: I have read the project README and CONTRIBUTING guide.
+          required: false

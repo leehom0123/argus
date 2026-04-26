@@ -1,0 +1,46 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+# Keep the shipped client wheel in-tree so collaborators can `pip install` it
+# without needing the full source build toolchain.
+!client/dist/
+!client/dist/*.whl
+.venv/
+venv/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# Node / Vite
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# Runtime artifacts
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+logs/
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# MkDocs build output
+/site/
+CLAUDE.md

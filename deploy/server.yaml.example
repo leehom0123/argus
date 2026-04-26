@@ -1,0 +1,94 @@
+# Argus deploy targets — copy this file to deploy/server.yaml (which is
+# gitignored) and fill in your server's real values:
+#
+#   cp deploy/server.yaml.example deploy/server.yaml
+#   # then edit deploy/server.yaml: replace REPLACE_ME placeholders
+#
+# The active server is chosen by:
+#   1. CLI flag        : python deploy/deploy.py --server <name>
+#   2. SERVER env var  : SERVER=staging python deploy/deploy.py
+#   3. top-level field : `activate:` below (used when neither of above is set)
+
+activate: primary
+
+servers:
+  # ---------------------------------------------------------------------
+  # One entry per deploy target. Add more under `servers:` as needed.
+  # The `name:` is what you reference via --server / SERVER / activate.
+  # ---------------------------------------------------------------------
+  - name: primary
+
+    # SSH connection used to upload the build artefact and run remote
+    # docker compose commands. Only `password` auth is supported today;
+    # key-based auth is on the roadmap.
+    ssh:
+      auth: password
+      host: REPLACE_ME           # e.g. argus.example.com or 1.2.3.4
+      port: 22                   # SSH port (some hosts expose a non-22 port)
+      user: REPLACE_ME           # SSH login user (must be able to run docker)
+      password: REPLACE_ME       # plaintext SSH password
+      timeout: 20                # connection timeout in seconds
+
+    # Where the project lives on the remote host AND which binaries the
+    # deploy script should invoke. The directory is created on first
+    # deploy if it does not exist; the user above must own/write it.
+    remote:
+      project_root: /opt/argus   # remote workspace; tar is uploaded + extracted here
+      python: /usr/bin/python3   # remote Python (only used by health-probe scripts)
+      docker: docker             # `docker` on PATH, or absolute /usr/bin/docker
+
+    # How users reach the deployed instance + where the runtime env file
+    # lives on the remote. `env_file` is pre-staged BY THE OPERATOR — the
+    # deploy script reads it for `docker compose up` but never uploads
+    # secrets from your laptop. See README.md for required variables
+    # (ARGUS_JWT_SECRET, ARGUS_CONFIG_KEY, SMTP_*, etc).
+    deploy:
+      public_url: https://REPLACE_ME             # public URL — only used in deploy log + health probe
+      env_file: /opt/argus/deploy/.env.production # ABSOLUTE path on the remote
+
+  # ---------------------------------------------------------------------
+  # Add more entries below. Example staging target (uncomment to use).
+  # Switch active via SERVER=staging or `activate: staging`.
+  # ---------------------------------------------------------------------
+  # - name: staging
+  #   ssh:
+  #     auth: password
+  #     host: staging.example.com
+  #     port: 22
+  #     user: deploy
+  #     password: REPLACE_ME
+  #     timeout: 20
+  #   remote:
+  #     project_root: /opt/argus
+  #     python: /usr/bin/python3
+  #     docker: docker
+  #   deploy:
+  #     public_url: https://staging.example.com
+  #     env_file: /opt/argus/deploy/.env.production
+
+
+# ---------------------------------------------------------------------
+# Tar packaging rules — shared across every server above.
+#
+# The deploy script always excludes a baseline set of noise patterns
+# regardless of what you list here:
+#
+#   node_modules, __pycache__, .git, .pytest_cache, frontend/dist,
+#   deploy/data, deploy/.env, deploy/.env.production, deploy/server.yaml,
+#   *.pyc, *.pyo
+#
+# Any entries below are APPENDED to that baseline. Use this for
+# project-specific paths you don't want shipped (e.g. local sample
+# datasets, scratch dirs, IDE state).
+# ---------------------------------------------------------------------
+deploy:
+  exclude_dirs:
+    - node_modules
+    - __pycache__
+    - .git
+    - .pytest_cache
+    - frontend/dist
+    - deploy/data
+    - deploy/server.yaml
+    - deploy/.env
+    - deploy/.env.production

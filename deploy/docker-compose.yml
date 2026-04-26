@@ -1,0 +1,82 @@
+services:
+  argus:
+    build:
+      # Build context is the repository root so the Dockerfile can COPY
+      # frontend/, backend/, and schemas/. The compose file itself lives in
+      # deploy/ and references the Dockerfile relatively.
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: ghcr.io/leehom0123/argus:latest
+    container_name: argus
+    restart: unless-stopped
+    ports:
+      # Upstream port for the existing nginx reverse proxy on the server.
+      - "8000:8000"
+    environment:
+      # --- core (ARGUS_JWT_SECRET is required) ----------------------------
+      ARGUS_JWT_SECRET: ${ARGUS_JWT_SECRET:?ARGUS_JWT_SECRET must be set in .env}
+      # Default SQLite. Override in deploy/.env (not tracked) to switch to
+      # Postgres:  ARGUS_DB_URL=postgresql+asyncpg://user:pw@host:5432/db
+      ARGUS_DB_URL: ${ARGUS_DB_URL:-sqlite+aiosqlite:////app/data/argus.db}
+      ARGUS_BASE_URL: ${ARGUS_BASE_URL:-https://argus.example.com}
+      ARGUS_LOG_LEVEL: ${ARGUS_LOG_LEVEL:-info}
+      ARGUS_ENV: ${ARGUS_ENV:-prod}
+
+      # --- smtp (optional; falls back to stdout if unset) -----------------
+      ARGUS_SMTP_HOST: ${ARGUS_SMTP_HOST:-}
+      ARGUS_SMTP_PORT: ${ARGUS_SMTP_PORT:-587}
+      ARGUS_SMTP_USER: ${ARGUS_SMTP_USER:-}
+      ARGUS_SMTP_PASS: ${ARGUS_SMTP_PASS:-}
+      ARGUS_SMTP_FROM: ${ARGUS_SMTP_FROM:-noreply@argus.example.com}
+
+      # --- notifications --------------------------------------------------
+      ARGUS_FEISHU_WEBHOOK: ${ARGUS_FEISHU_WEBHOOK:-}
+
+      # --- cors -----------------------------------------------------------
+      # _cors_origins() derives the allow-list from ARGUS_BASE_URL plus the
+      # vite dev origin. Kept here for documentation / future use.
+      ARGUS_CORS_ORIGINS: ${ARGUS_CORS_ORIGINS:-https://argus.example.com,http://localhost:5173}
+
+      # --- scaling (Team Scale) -------------------------------------------
+      # Number of uvicorn workers. 4 is the default installed by
+      # deploy/entrypoint.sh. Set to 1 for the SQLite dev loop; scale up
+      # toward N_CORES when running on Postgres. In-process singletons
+      # (retention sweep, SQLite backup, watchdog) are fcntl-guarded so
+      # only one worker runs them — see docs/deploy/scaling.md.
+      ARGUS_WORKERS: ${ARGUS_WORKERS:-4}
+
+      # SQLAlchemy connection pool. Per worker: pool_size sockets held
+      # open + up to max_overflow burst. With the defaults below and 4
+      # workers we reserve 4 * (10 + 15) = 100 slots, which matches PG's
+      # default max_connections=100. Drop to 5/5 if you also run
+      # pgbouncer in transaction mode. Both vars fall through to
+      # backend.db._pool_defaults_for when unset.
+      ARGUS_DB_POOL_SIZE: ${ARGUS_DB_POOL_SIZE:-10}
+      ARGUS_DB_POOL_MAX_OVERFLOW: ${ARGUS_DB_POOL_MAX_OVERFLOW:-15}
+
+      # --- data retention (optional; defaults shown) ----------------------
+      # How many days to keep each data class before the in-process sweeper
+      # deletes rows. Snapshots and log lines are short-lived; batch/job
+      # result rows are never purged (archive).
+      ARGUS_RETENTION_SNAPSHOT_DAYS: ${ARGUS_RETENTION_SNAPSHOT_DAYS:-7}
+      ARGUS_RETENTION_LOG_LINE_DAYS: ${ARGUS_RETENTION_LOG_LINE_DAYS:-14}
+      ARGUS_RETENTION_JOB_EPOCH_DAYS: ${ARGUS_RETENTION_JOB_EPOCH_DAYS:-30}
+      ARGUS_RETENTION_EVENT_OTHER_DAYS: ${ARGUS_RETENTION_EVENT_OTHER_DAYS:-90}
+      ARGUS_RETENTION_DEMO_DATA_DAYS: ${ARGUS_RETENTION_DEMO_DATA_DAYS:-1}
+      # Sweep interval in minutes (set to 0 to disable the in-process loop).
+      ARGUS_RETENTION_SWEEP_MINUTES: ${ARGUS_RETENTION_SWEEP_MINUTES:-60}
+
+      # --- github oauth (optional; disabled unless all three are set) -----
+      ARGUS_GITHUB_OAUTH_ENABLED: ${ARGUS_GITHUB_OAUTH_ENABLED:-false}
+      ARGUS_GITHUB_CLIENT_ID: ${ARGUS_GITHUB_CLIENT_ID:-}
+      ARGUS_GITHUB_CLIENT_SECRET: ${ARGUS_GITHUB_CLIENT_SECRET:-}
+    volumes:
+      # SQLite + any future spill dirs live on the host filesystem so the
+      # container is fully stateless.
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

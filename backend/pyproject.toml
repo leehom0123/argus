@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argus-backend"
+version = "0.3.0"
+description = "FastAPI backend for Argus (ML experiment monitor)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Argus contributors" }]
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30,<0.35",
+    "python-multipart>=0.0.6",
+    "sqlalchemy[asyncio]>=2.0",
+    "aiosqlite",
+    "pydantic>=2.5",
+    "pydantic-settings>=2.0",
+    "email-validator>=2.0",
+    "jsonschema>=4",
+    "pyyaml",
+    "httpx",
+    "argon2-cffi>=23.1",
+    "pyjwt>=2.8",
+    "aiosmtplib>=3.0",
+    "jinja2>=3.1",
+    "alembic>=1.13",
+    "scipy>=1.10",
+    "cryptography>=41",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "freezegun",
+]
+# Install with ``pip install -e ".[postgres]"`` when running against a
+# PostgreSQL backend. SQLite is the default and requires no extra deps;
+# asyncpg powers the async runtime path, psycopg2-binary is used by
+# alembic for sync migration operations on psycopg2 URLs.
+postgres = [
+    "asyncpg>=0.30",
+    "psycopg2-binary>=2.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["backend/tests"]

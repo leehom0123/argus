@@ -1,0 +1,42 @@
+{
+  "name": "argus-frontend",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test:i18n": "python3 scripts/i18n_lint.py && vitest run src/i18n/__tests__/locale_parity.test.ts",
+    "test:unit": "vitest run"
+  },
+  "_comments": {
+    "ant-design-vue": "Pinned to exact versions (no ^/~). Patch upgrades have caused subtle CSS regressions when dependabot/pnpm pulled a slightly different patch under a caret range; lock both ant-design-vue and @ant-design/icons-vue together to keep visual output stable across installs."
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "7.0.1",
+    "ant-design-vue": "4.2.6",
+    "axios": "^1.7.7",
+    "dayjs": "^1.11.13",
+    "echarts": "^5.5.1",
+    "pinia": "^2.2.4",
+    "vue": "^3.5.12",
+    "vue-echarts": "^7.0.3",
+    "vue-i18n": "^9.14.5",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.9",
+    "vue-tsc": "^2.1.10"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

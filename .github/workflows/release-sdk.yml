@@ -1,0 +1,83 @@
+name: release-sdk
+
+on:
+  push:
+    tags:
+      - 'sdk-v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build SDK wheel + sdist
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build backend
+        run: pip install build
+
+      - name: Build sdist + wheel
+        working-directory: client
+        run: python -m build --sdist --wheel
+
+      - name: Upload dist for downstream jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dist
+          path: client/dist/
+          retention-days: 90
+
+  publish-pypi:
+    name: Publish to PyPI (Trusted Publisher)
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/argus-reporter/
+
+    # Trusted Publishing lives on the PyPI side: configure
+    #   PyPI project -> Publishing -> Add publisher -> GitHub Actions
+    #   owner: leehom0123, repo: argus,
+    #   workflow: release-sdk.yml, environment: pypi
+    # Once that's in place, OIDC handles auth — no PYPI_API_TOKEN needed.
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist/
+
+      - name: Publish via Trusted Publisher
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
+
+  github-release:
+    name: Attach wheel to GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist/
+
+      - name: Create GitHub Release with wheel
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          generate_release_notes: true

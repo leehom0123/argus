@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "argus-reporter"
+version = "0.3.0"
+description = "Context-manager-first Python SDK for Argus (schema v1.1)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Argus contributors" }]
+keywords = ["argus", "experiment", "monitor", "mlops", "telemetry"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-httpserver>=1.0",
+    "pytest-timeout>=2.2",
+    "jsonschema>=4.0",
+]
+lightning = ["pytorch-lightning>=2.0"]
+keras = ["keras>=2.10"]
+hydra = ["hydra-core>=1.3"]
+all-integrations = ["argus-reporter[lightning,keras,hydra]"]
+
+[project.urls]
+Homepage = "https://github.com/leehom0123/argus"
+Repository = "https://github.com/leehom0123/argus"
+Documentation = "https://github.com/leehom0123/argus/blob/main/client/README.md"
+Issues = "https://github.com/leehom0123/argus/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["argus"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "argus",
+    "tests",
+    "examples",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 30
+filterwarnings = ["ignore::DeprecationWarning"]
