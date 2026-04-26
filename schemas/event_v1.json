@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://argus.local/schemas/event_v1.1.json",
+  "title": "ExperimentMonitorEvent",
+  "description": "Event contract v1.1 between experiment runners and the monitor WebUI. All events posted to POST /api/events or POST /api/events/batch must conform. v1.1 adds client-generated event_id for idempotency — clients MUST generate a UUID per event; backend uses it to deduplicate retries (e.g. spill replay).",
+  "type": "object",
+  "required": ["event_id", "schema_version", "event_type", "timestamp", "batch_id", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Client-generated UUID (v4 recommended). Backend uses this to deduplicate retried POSTs — repeated submissions of the same event_id return 200 with the original db_id and do not create a second row."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.1",
+      "description": "Pin this so backend can route by version. Bump major for breaking changes."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "batch_start",
+        "batch_done",
+        "batch_failed",
+        "job_start",
+        "job_epoch",
+        "job_done",
+        "job_failed",
+        "resource_snapshot",
+        "log_line"
+      ],
+      "description": "Discriminator for `data` payload shape."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC, e.g. 2026-04-23T09:23:06Z"
+    },
+    "batch_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Groups jobs from the same sweep / benchmark invocation."
+    },
+    "job_id": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Null for batch-level events; otherwise unique within a batch."
+    },
+    "source": {
+      "type": "object",
+      "required": ["project"],
+      "additionalProperties": false,
+      "properties": {
+        "project":  {"type": "string", "description": "e.g. DeepTS-Flow-Wheat"},
+        "host":     {"type": "string", "description": "where the run executes (server hostname)"},
+        "user":     {"type": "string"},
+        "commit":   {"type": "string", "description": "short git SHA"},
+        "command":  {"type": "string", "description": "the launching CLI"}
+      }
+    },
+    "data": {
+      "type": "object",
+      "description": "Event-type-specific payload. See examples below. Extra fields accepted and stored for forward-compat."
+    }
+  },
+  "examples": [
+    {
+      "event_id": "550e8400-e29b-41d4-a716-446655440000",
+      "schema_version": "1.1",
+      "event_type": "batch_start",
+      "timestamp": "2026-04-23T09:23:06Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": null,
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com", "user": "alice"},
+      "data": {
+        "experiment_type": "forecast",
+        "n_total_jobs": 120,
+        "command": "scripts/forecast/run_benchmark.py --epochs 50 -j 3 --jl 1 --order model"
+      }
+    },
+    {
+      "event_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "schema_version": "1.1",
+      "event_type": "job_start",
+      "timestamp": "2026-04-23T09:23:06Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": "etth1_transformer",
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com", "user": "alice"},
+      "data": {"model": "transformer", "dataset": "etth1", "config_digest": "sha256:...", "run_dir": "outputs/forecast/2026-04-23_09-23-06_etth1_transformer"}
+    },
+    {
+      "event_id": "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+      "schema_version": "1.1",
+      "event_type": "job_epoch",
+      "timestamp": "2026-04-23T09:23:20Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": "etth1_transformer",
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com"},
+      "data": {"epoch": 5, "train_loss": 0.124, "val_loss": 0.152, "lr": 1.0e-4}
+    },
+    {
+      "event_id": "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+      "schema_version": "1.1",
+      "event_type": "job_done",
+      "timestamp": "2026-04-23T09:23:26Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": "etth1_transformer",
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com"},
+      "data": {
+        "status": "DONE",
+        "elapsed_s": 20,
+        "train_epochs": 8,
+        "metrics": {"MSE": 0.442, "MAE": 0.427, "R2": 0.60, "PCC": 0.77},
+        "resources": {"gpu_mem_peak_mb": 2431, "shap_gpu_peak_mb": 2880}
+      }
+    },
+    {
+      "event_id": "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
+      "schema_version": "1.1",
+      "event_type": "resource_snapshot",
+      "timestamp": "2026-04-23T09:23:10Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": null,
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com"},
+      "data": {
+        "gpu_util_pct": 94, "gpu_mem_mb": 45768, "gpu_mem_total_mb": 97887, "gpu_temp_c": 68,
+        "cpu_util_pct": 2.5, "ram_mb": 26624, "ram_total_mb": 128000,
+        "disk_free_mb": 152576
+      }
+    },
+    {
+      "event_id": "6ba7b814-9dad-11d1-80b4-00c04fd430c8",
+      "schema_version": "1.1",
+      "event_type": "batch_done",
+      "timestamp": "2026-04-23T23:23:06Z",
+      "batch_id": "bench-2026-04-23-abc123",
+      "job_id": null,
+      "source": {"project": "DeepTS-Flow-Wheat", "host": "train.example.com"},
+      "data": {"n_done": 118, "n_failed": 2, "total_elapsed_s": 50400}
+    }
+  ]
+}

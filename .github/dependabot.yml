@@ -1,0 +1,59 @@
+version: 2
+
+# Dependency hygiene for argus:
+#   - pip ecosystems for the FastAPI backend and the public SDK
+#   - npm/pnpm for the Vue frontend
+#   - github-actions for the workflows themselves
+#   - docker for the deploy/ image (compose + Dockerfile share the dir)
+#
+# Weekly cadence keeps PR noise bounded; security advisories still flow in
+# immediately via GitHub's separate alerting path.
+
+updates:
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies, backend]
+    commit-message:
+      prefix: chore(deps-backend)
+
+  - package-ecosystem: pip
+    directory: /client
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies, sdk]
+    commit-message:
+      prefix: chore(deps-sdk)
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies, frontend]
+    commit-message:
+      prefix: chore(deps-frontend)
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels: [dependencies, ci]
+    commit-message:
+      prefix: chore(deps-ci)
+
+  - package-ecosystem: docker
+    directory: /deploy
+    schedule:
+      interval: weekly
+      day: monday
+    labels: [dependencies, docker]
+    commit-message:
+      prefix: chore(deps-docker)

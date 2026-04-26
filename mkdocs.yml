@@ -1,0 +1,163 @@
+site_name: Argus
+site_description: Self-hostable ML experiment monitoring platform (formerly experiment-monitor)
+site_url: https://leehom0123.github.io/argus/
+repo_url: https://github.com/leehom0123/argus
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+# Files in docs/ that aren't part of the MkDocs nav (legacy design notes,
+# review reports, deploy notes) — exclude so --strict doesn't flag them.
+# Scheme A: zh-CN translations live under docs/zh/ as a mirror tree, so the
+# i18n plugin picks them up automatically; the same off-nav pages there are
+# also excluded.
+exclude_docs: |
+  architecture.md
+  design.md
+  design/
+  requirements.md
+  deploy/
+  reviews/
+  sdk/integrations.md
+  sdk/release-notes.md
+  zh/architecture.md
+  zh/design.md
+  zh/design/
+  zh/requirements.md
+  zh/deploy/
+  zh/reviews/
+  zh/sdk/integrations.md
+  zh/sdk/release-notes.md
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: zh
+          name: 简体中文
+          build: true
+          site_name: 实验监测平台
+          nav_translations:
+            Home: 首页
+            Getting started: 快速开始
+            Installation: 安装
+            First run: 首次运行
+            Connect a training job: 接入训练任务
+            User guide: 使用指南
+            How-to: 操作指南
+            Report metrics for the leaderboard: 让训练出现在 Leaderboard 上
+            Dashboard: 仪表盘
+            Projects & batches: 项目与批次
+            Jobs list: 任务列表
+            Job matrix: 任务矩阵
+            Job detail: 任务详情
+            Profile & settings: 个人资料与设置
+            Sharing: 分享
+            Notifications: 通知
+            SDK reference: SDK 参考
+            Reporter API: Reporter API
+            Hydra callback: Hydra 回调
+            Event schema: 事件 Schema
+            Batch identity & resume: 批次身份与续跑
+            Operations: 运维
+            Docker deployment: Docker 部署
+            Configuration: 配置项
+            Admin settings: 管理员设置
+            Argus Agent: Argus Agent
+            Database (SQLite vs Postgres): 数据库（SQLite vs Postgres）
+            Backups & retention: 备份与保留策略
+            Architecture: 架构
+            Contributing: 贡献指南
+            Changelog: 变更日志
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - client
+          options:
+            show_source: false
+            show_root_heading: true
+            members_order: source
+            docstring_style: numpy
+            heading_level: 2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/leehom0123/argus
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - First run: getting-started/first-run.md
+      - Connect a training job: getting-started/connect-training.md
+  - How-to:
+      - Report metrics for the leaderboard: how-to/report-metrics-for-leaderboard.md
+  - User guide:
+      - Dashboard: user-guide/dashboard.md
+      - Projects & batches: user-guide/projects-batches.md
+      - Jobs list: user-guide/jobs-list.md
+      - Job matrix: user-guide/job-matrix.md
+      - Job detail: user-guide/job-detail.md
+      - Profile & settings: user-guide/profile-settings.md
+      - Sharing: user-guide/sharing.md
+      - Notifications: user-guide/notifications.md
+  - SDK reference:
+      - Reporter API: sdk/reporter.md
+      - Batch identity & resume: sdk/resume.md
+      - Hydra callback: sdk/hydra-callback.md
+      - Event schema: sdk/event-schema.md
+  - Operations:
+      - Docker deployment: ops/docker.md
+      - Configuration: ops/configuration.md
+      - Admin settings: ops/admin-settings.md
+      - Argus Agent: ops/argus-agent.md
+      - Database (SQLite vs Postgres): ops/database.md
+      - Backups & retention: ops/retention.md
+  - Architecture: architecture-overview.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md

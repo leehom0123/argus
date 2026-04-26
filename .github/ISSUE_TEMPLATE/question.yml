@@ -1,0 +1,37 @@
+name: Question
+description: |
+  Ask a usage or design question / 提出使用或设计相关的问题
+title: "[question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended questions, discussion threads, or "how do I do X"
+        questions, please prefer
+        [GitHub Discussions](https://github.com/leehom0123/argus/discussions)
+        — they're easier to search and follow up on.
+
+        对于开放式讨论或 "如何做 X" 这类问题，请优先使用
+        [GitHub Discussions](https://github.com/leehom0123/argus/discussions)
+        — 更便于检索和跟进。
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: |
+        Describe what you're trying to do and what's unclear.
+        描述你想做什么，以及哪里不明白。
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: |
+        Version, deployment setup, anything else that helps us answer.
+        版本、部署方式，以及任何有助于回答的信息。
+    validations:
+      required: false

@@ -1,0 +1,8 @@
+# Runtime secrets and persistent data — never commit.
+.env
+.env.*
+!.env.example
+data/
+
+# paramiko deploy: real credentials (server.yaml.example IS committed).
+server.yaml

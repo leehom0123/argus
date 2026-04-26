@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project README / 项目说明
+    url: https://github.com/leehom0123/argus#readme
+    about: Read the project overview, install steps, and quick start. / 项目简介、安装步骤与快速上手。
+  - name: GitHub Discussions / 社区讨论
+    url: https://github.com/leehom0123/argus/discussions
+    about: Open-ended questions and community discussion. / 开放式问题与社区讨论。
+  - name: Security vulnerability / 安全漏洞
+    url: https://github.com/leehom0123/argus/security/policy
+    about: Do not file public issues for security vulnerabilities — see SECURITY.md. / 安全漏洞请按 SECURITY.md 私下报告，勿公开提交。

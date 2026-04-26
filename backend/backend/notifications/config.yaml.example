@@ -1,0 +1,21 @@
+# Notification rules. Copy to backend/config/notifications.yaml to activate.
+#
+# Supported expression forms (no eval — parsed safely):
+#   event_type == "job_failed"
+#   event_type == "batch_done" and data.n_failed > 0
+#   data.gpu_util_pct < 10
+#
+# `push` lists channel names. Channels themselves are configured in app.py
+# (e.g. FeishuNotifier(webhook_url=...)) and registered by name.
+
+channels:
+  feishu:
+    webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/REPLACE_ME"
+
+rules:
+  - when: event_type == "job_failed"
+    push: [feishu]
+  - when: event_type == "batch_done" and data.n_failed > 0
+    push: [feishu]
+  - when: event_type == "resource_snapshot" and data.gpu_util_pct < 10
+    push: [feishu]

@@ -1,0 +1,61 @@
+name: Feature request
+description: |
+  Suggest a new feature or enhancement / 建议一个新功能或改进
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a new feature.
+        感谢你提出功能建议。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: |
+        What problem does this feature solve? Who is affected?
+        这个功能要解决什么问题？谁会受影响？
+      placeholder: |
+        I'm always frustrated when ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: |
+        Describe the change you'd like to see and how it should behave.
+        描述你希望看到的变更，以及它应该如何工作。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        What other solutions did you consider, and why is the proposed one preferred?
+        你还考虑过哪些方案？为什么倾向于当前这个？
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: |
+        Mockups, screenshots, links to similar features in other tools, etc.
+        原型图、截图、其它工具的类似功能链接等。
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I have searched existing issues and confirmed this is not a duplicate.
+          required: true

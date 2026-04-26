@@ -1,0 +1,57 @@
+name: docs-build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs-build.yml'
+
+concurrency:
+  group: docs-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: mkdocs build --strict
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # Wave 4 ships the actual mkdocs.yml. Until it lands, this workflow
+      # short-circuits with a notice rather than failing — keeps the path
+      # filter useful while the docs harness is bootstrapped.
+      - name: Detect mkdocs config
+        id: mkdocs
+        shell: bash
+        run: |
+          if [ -f mkdocs.yml ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::mkdocs.yml not yet present; skipping docs build."
+          fi
+
+      - name: Install MkDocs + plugins
+        if: steps.mkdocs.outputs.present == 'true'
+        run: pip install mkdocs-material mkdocs-static-i18n mkdocstrings-python
+
+      - name: Build (strict — fails on broken links / missing pages)
+        if: steps.mkdocs.outputs.present == 'true'
+        run: mkdocs build --strict

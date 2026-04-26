@@ -1,0 +1,149 @@
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/*
+ * Theme-aware text / surface tokens (#120 light-theme audit).
+ *
+ * The codebase grew with dark-theme-only CSS (literal rgba(255,255,255, …)
+ * everywhere in scoped <style> blocks) which collapses to white-on-white
+ * once the user flips to the AntD light algorithm. To unblock light theme
+ * without rewriting every component, we expose seven custom properties
+ * that flip on the existing ``html.dark`` marker class and substitute the
+ * old hard-coded whites at the call sites. The numeric alphas roughly map
+ * to AntD's text token ladder (primary / secondary / tertiary / quaternary)
+ * so light-mode contrast lands at WCAG AA on white surfaces.
+ */
+:root {
+  --text-primary: rgba(0, 0, 0, 0.88);
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-quaternary: rgba(0, 0, 0, 0.25);
+  --border-soft: rgba(0, 0, 0, 0.08);
+  --surface-soft: rgba(0, 0, 0, 0.03);
+  --surface-soft-strong: rgba(0, 0, 0, 0.06);
+
+  /* Matrix cell tokens — used by JobMatrix.vue scoped styles. Defined here
+     so they flip automatically with the html.dark marker class, avoiding the
+     need for :global(html.dark) hacks inside scoped <style> blocks. */
+  --matrix-cell-bg: #ffffff;
+  --matrix-cell-border: rgba(0, 0, 0, 0.12);
+  --matrix-cell-color: rgba(0, 0, 0, 0.85);
+  --matrix-cell-empty-bg: rgba(0, 0, 0, 0.03);
+  --matrix-cell-empty-color: rgba(0, 0, 0, 0.35);
+  --matrix-secondary-color: rgba(0, 0, 0, 0.55);
+  --matrix-header-border: rgba(0, 0, 0, 0.06);
+  --matrix-subtitle-color: rgba(0, 0, 0, 0.55);
+  --matrix-best-chip-bg: hsla(45, 80%, 92%, 1);
+  --matrix-best-chip-color: #875a07;
+}
+
+/* Dark scrollbars — only when the dark class is active */
+html.dark {
+  color-scheme: dark;
+  --text-primary: rgba(255, 255, 255, 0.88);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  --text-quaternary: rgba(255, 255, 255, 0.25);
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --surface-soft: rgba(255, 255, 255, 0.03);
+  --surface-soft-strong: rgba(255, 255, 255, 0.06);
+
+  --matrix-cell-bg: #1f1f1f;
+  --matrix-cell-border: rgba(255, 255, 255, 0.16);
+  --matrix-cell-color: rgba(255, 255, 255, 0.88);
+  --matrix-cell-empty-bg: rgba(255, 255, 255, 0.04);
+  --matrix-cell-empty-color: rgba(255, 255, 255, 0.4);
+  --matrix-secondary-color: rgba(255, 255, 255, 0.55);
+  --matrix-header-border: rgba(255, 255, 255, 0.08);
+  --matrix-subtitle-color: rgba(255, 255, 255, 0.45);
+  --matrix-best-chip-bg: rgba(255, 196, 35, 0.12);
+  --matrix-best-chip-color: #ffd666;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Layout root fills viewport */
+.app-root {
+  min-height: 100vh;
+}
+
+.page-container {
+  padding: 16px 20px;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Matrix cell — base layout only; colours come from CSS variables defined
+   above so they flip automatically in dark mode. JobMatrix.vue scoped
+   styles reference the --matrix-* tokens for background/border/text. */
+.matrix-cell {
+  min-height: 32px;
+  min-width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.matrix-cell:hover {
+  transform: scale(1.03);
+}
+
+/* Muted helper text — adapts with Ant Design's text token */
+.muted {
+  color: var(--ant-color-text-description, rgba(0, 0, 0, 0.45));
+}
+html.dark .muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.empty-wrap {
+  padding: 48px 24px;
+  text-align: center;
+}

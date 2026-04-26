@@ -1,0 +1,18 @@
+# <type>(<scope>): <subject> (50 chars max) / 简要描述（≤50 字）
+# |<---- Preferred subject width 50 ---->|
+#
+# <body>
+# |<---- Body / 正文 wrapped at 72 ------>|
+#
+# <footer>
+# Examples / 示例:
+#   feat(ui): add bilingual metric chart export / 新增双语指标导出
+#   fix(backend): race in experiment status update / 修复状态更新竞态
+#   docs(api): update /runs endpoint description / 更新接口文档
+#   refactor(db): migrate to UUID primary keys / 主键迁移至 UUID
+#
+# Types: feat / fix / docs / refactor / test / chore / ci
+# 类型：feat 新功能 / fix 修复 / docs 文档 / refactor 重构 / test 测试 / chore 杂项 / ci
+#
+# Scopes (examples): backend / frontend / db / api / ui / ci
+# 范围（示例）：backend / frontend / db / api / ui / ci

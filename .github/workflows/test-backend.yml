@@ -1,0 +1,123 @@
+name: test-backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: test-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # SQLite matrix: the default zero-config developer path. Runs on every
+  # supported Python version so we catch syntax / typing regressions early.
+  # ---------------------------------------------------------------------------
+  test-sqlite:
+    name: pytest (SQLite, py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install backend with dev extras
+        working-directory: backend
+        run: pip install -e ".[dev]"
+
+      - name: Set SQLite DATABASE_URL
+        run: echo "MONITOR_DB_URL=sqlite+aiosqlite:///:memory:" >> "$GITHUB_ENV"
+
+      - name: pytest (full suite, fail-fast)
+        working-directory: backend
+        run: pytest -x
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL matrix: opt-in production path documented in
+  # docs/deploy/postgres.md. Boots postgres:16 as a service container,
+  # runs alembic upgrade -> downgrade -> upgrade to catch dialect drift,
+  # and executes the dual-DB-marked tests against the live PG instance.
+  # Pinned to Python 3.11 (alembic + asyncpg are version-stable here).
+  # ---------------------------------------------------------------------------
+  test-postgres:
+    name: pytest (PostgreSQL, py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11']
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: monitor
+          POSTGRES_PASSWORD: testpw
+          POSTGRES_DB: argus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MONITOR_DB_URL: postgresql+asyncpg://monitor:testpw@localhost:5432/argus_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install backend with dev + postgres extras
+        working-directory: backend
+        run: pip install -e ".[dev,postgres]"
+
+      # Catches schema-level dialect drift (boolean defaults, JSONB usage,
+      # raw SQL portability) before the test suite exercises the runtime path.
+      - name: Alembic upgrade head
+        working-directory: backend
+        run: alembic upgrade head
+
+      - name: Alembic downgrade to base
+        working-directory: backend
+        run: alembic downgrade base
+
+      - name: Alembic re-upgrade to head
+        working-directory: backend
+        run: alembic upgrade head
+
+      # The `dual_db` marker is reserved for tests that exercise the engine
+      # directly against PG (no in-memory SQLite fixture override). If no
+      # such tests exist yet, pytest exits 5 ("no tests collected") which
+      # we treat as a soft pass so the workflow still gates on migrations.
+      - name: pytest dual_db marker
+        working-directory: backend
+        run: |
+          set +e
+          pytest -m dual_db -v
+          rc=$?
+          if [ "$rc" -eq 5 ]; then
+            echo "::notice::No tests marked @pytest.mark.dual_db yet; migration smoke is the only PG gate."
+            exit 0
+          fi
+          exit "$rc"

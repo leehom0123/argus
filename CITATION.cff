@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+title: Argus
+message: "If you use this software, please cite as below."
+type: software
+authors:
+  - given-names: Hong
+    family-names: Li
+    email: leehom0123@gmail.com
+    affiliation: Universiti Teknologi Malaysia
+repository-code: https://github.com/leehom0123/argus
+license: Apache-2.0
+version: 0.3.0
+date-released: "2026-04-26"
