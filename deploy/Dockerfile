@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1 — frontend build
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS frontend-build
+FROM node:25-alpine AS frontend-build
 WORKDIR /build
 
 # Use npm (lighter than corepack-pnpm) so the image works whether or not a
