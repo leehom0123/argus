@@ -12,7 +12,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Argus contributors" }]
 dependencies = [
     "fastapi>=0.115",
-    "uvicorn[standard]>=0.30,<0.35",
+    "uvicorn[standard]>=0.30,<0.47",
     "python-multipart>=0.0.6",
     "sqlalchemy[asyncio]>=2.0",
     "aiosqlite",
