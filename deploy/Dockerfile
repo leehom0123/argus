@@ -35,7 +35,7 @@ RUN if [ -f pnpm-lock.yaml ]; then pnpm run build; else npm run build; fi
 # ---------------------------------------------------------------------------
 # Stage 2 — backend runtime
 # ---------------------------------------------------------------------------
-FROM python:3.11-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # System packages: build-essential for argon2-cffi wheels on uncommon archs,
 # curl for the healthcheck. libpq-dev is included so future Postgres support
