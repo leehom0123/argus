@@ -30,7 +30,7 @@
     "@vitejs/plugin-vue": "^5.1.4",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^25.0.1",
-    "typescript": "^5.6.3",
+    "typescript": "^6.0.3",
     "unplugin-vue-components": "^0.27.4",
     "vite": "^5.4.10",
     "vitest": "^2.1.9",
